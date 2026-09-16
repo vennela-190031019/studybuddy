@@ -1,0 +1,53 @@
+# StudyBuddy theme — "reading room": warm paper background + ink-navy
+# sidebar + amber accent, instead of Streamlit's default red/dark look.
+# See the assistant's summary for the reasoning behind each color.
+
+[theme]
+base = "light"
+
+primaryColor = "#B45309"                 # burnt amber — buttons, active states
+backgroundColor = "#FBF7EF"              # warm paper background for main content
+secondaryBackgroundColor = "#F1E7D3"     # tan — widget backgrounds, code blocks
+textColor = "#232A36"                    # ink navy body text
+
+linkColor = "#B45309"
+linkUnderline = false
+borderColor = "#DDD0B5"                  # tan border to match the paper background
+
+codeBackgroundColor = "#F1E7D3"
+codeTextColor = "#232A36"
+
+greenColor = "#1F7A5C"
+greenBackgroundColor = "#DCEFE6"
+greenTextColor = "#155D45"
+
+redColor = "#B3261E"
+redBackgroundColor = "#F8DEDC"
+redTextColor = "#8C1D18"
+
+orangeColor = "#B45309"
+orangeBackgroundColor = "#F6E6D2"
+orangeTextColor = "#8A3E07"
+
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+headingFont = "'Lora':https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&display=swap"
+baseFontSize = 16
+baseFontWeight = 400
+headingFontWeights = [600, 600, 600, 600, 500, 500]
+
+baseRadius = "12px"
+buttonRadius = "8px"
+showWidgetBorder = true
+showSidebarBorder = true
+
+# Dark, book-cover-like sidebar for contrast against the paper main area.
+# Every sidebar color is overridden together (not just backgroundColor) so
+# text, borders, and active states all stay readable on the dark panel.
+[theme.sidebar]
+backgroundColor = "#1E2733"
+secondaryBackgroundColor = "#28323F"
+textColor = "#F1E7D3"
+primaryColor = "#D9A441"
+borderColor = "#354357"
+codeBackgroundColor = "#28323F"
+codeTextColor = "#F1E7D3"
