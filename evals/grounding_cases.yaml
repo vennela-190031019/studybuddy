@@ -1,0 +1,144 @@
+# Eval set for engine/grounding.py's MockGroundingVerifier.
+#
+# 20 cases, 10 genuinely grounded (the answer is directly supported by the
+# cited passage) and 10 deliberately ungrounded. The ungrounded set mixes
+# two kinds of cases on purpose:
+#   - "easy": citation is from a completely unrelated passage (low keyword
+#     overlap, should be easy for a keyword-overlap rule to catch)
+#   - "hard": citation is on-topic but doesn't actually support the specific
+#     claim in the answer (shares many keywords with a correct answer on
+#     the same topic, so a naive keyword-overlap verifier may be fooled)
+# These are not tuned to make the verifier look good — see
+# evals/run_grounding_eval.py for the resulting precision/recall.
+
+passages:
+  mito: &mito >
+    Mitochondria are membrane-bound organelles found in most eukaryotic cells.
+    They generate most of the cell's supply of adenosine triphosphate (ATP),
+    which is used as a source of chemical energy. Mitochondria have their own
+    DNA, separate from the cell's nuclear DNA, and are often called the
+    powerhouse of the cell.
+  photo: &photo >
+    Photosynthesis is the process plants use to convert light energy into
+    chemical energy. Chlorophyll inside the chloroplast absorbs sunlight.
+    The products of photosynthesis are glucose and oxygen, while carbon
+    dioxide and water are the main inputs.
+  newton: &newton >
+    Newton's three laws of motion describe the relationship between a body
+    and the forces acting upon it. The first law states that an object
+    remains at rest or in uniform motion unless acted on by a force. The
+    second law relates force, mass, and acceleration as F=ma. The third law
+    states that for every action there is an equal and opposite reaction.
+  french: &french >
+    The French Revolution began in 1789 and led to the end of the monarchy
+    in France. It was driven by financial crisis, food shortages, and
+    widespread resentment of noble privilege. The revolution introduced the
+    Declaration of the Rights of Man and eventually gave rise to Napoleon
+    Bonaparte's rise to power.
+
+cases:
+  # --- grounded (10) ---
+  - id: g1
+    question: "What is the main function of mitochondria?"
+    answer: "They produce ATP, the cell's main energy currency."
+    citation: *mito
+    expected_grounded: true
+  - id: g2
+    question: "What do mitochondria have that is separate from the cell's nuclear DNA?"
+    answer: "Their own DNA."
+    citation: *mito
+    expected_grounded: true
+  - id: g3
+    question: "Why are mitochondria called the powerhouse of the cell?"
+    answer: "Because they generate most of the cell's ATP supply."
+    citation: *mito
+    expected_grounded: true
+  - id: g4
+    question: "What pigment absorbs sunlight during photosynthesis?"
+    answer: "Chlorophyll inside the chloroplast."
+    citation: *photo
+    expected_grounded: true
+  - id: g5
+    question: "What are the products of photosynthesis?"
+    answer: "Glucose and oxygen."
+    citation: *photo
+    expected_grounded: true
+  - id: g6
+    question: "What are the main inputs to photosynthesis?"
+    answer: "Carbon dioxide and water."
+    citation: *photo
+    expected_grounded: true
+  - id: g7
+    question: "What does Newton's second law relate?"
+    answer: "Force, mass, and acceleration, as F=ma."
+    citation: *newton
+    expected_grounded: true
+  - id: g8
+    question: "What does Newton's third law state?"
+    answer: "For every action there is an equal and opposite reaction."
+    citation: *newton
+    expected_grounded: true
+  - id: g9
+    question: "When did the French Revolution begin?"
+    answer: "1789."
+    citation: *french
+    expected_grounded: true
+  - id: g10
+    question: "What document did the French Revolution introduce?"
+    answer: "The Declaration of the Rights of Man."
+    citation: *french
+    expected_grounded: true
+
+  # --- ungrounded: easy (citation from an unrelated passage) ---
+  - id: u1
+    question: "What is the main function of mitochondria?"
+    answer: "They produce ATP."
+    citation: *photo
+    expected_grounded: false
+  - id: u2
+    question: "What are the products of photosynthesis?"
+    answer: "Glucose and oxygen."
+    citation: *newton
+    expected_grounded: false
+  - id: u3
+    question: "What does Newton's second law state?"
+    answer: "F=ma."
+    citation: *french
+    expected_grounded: false
+  - id: u4
+    question: "When did the French Revolution begin?"
+    answer: "1789."
+    citation: *mito
+    expected_grounded: false
+  - id: u5
+    question: "What pigment absorbs sunlight?"
+    answer: "Chlorophyll."
+    citation: *newton
+    expected_grounded: false
+  - id: u6
+    question: "What year did Napoleon become emperor of France?"
+    answer: "1804."
+    citation: *french
+    expected_grounded: false
+
+  # --- ungrounded: hard (on-topic, but the specific claim isn't supported) ---
+  - id: u7
+    question: "What is mitochondrial DNA used for?"
+    answer: "It lets mitochondria independently replicate without the cell's nucleus."
+    citation: *mito
+    expected_grounded: false
+  - id: u8
+    question: "How many ATP molecules does one glucose molecule yield via mitochondrial respiration?"
+    answer: "Approximately 36 ATP molecules."
+    citation: *mito
+    expected_grounded: false
+  - id: u9
+    question: "What specific wavelengths of light does chlorophyll absorb best?"
+    answer: "Red and blue light, roughly 430nm and 662nm."
+    citation: *photo
+    expected_grounded: false
+  - id: u10
+    question: "What equation did Newton derive for the force of gravity between two masses?"
+    answer: "F = G*m1*m2/r^2, the law of universal gravitation."
+    citation: *newton
+    expected_grounded: false
