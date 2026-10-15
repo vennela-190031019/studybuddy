@@ -1,6 +1,6 @@
 import random
 
-from engine.selector import ConceptState, random_selector, select_next
+from engine.selector import ConceptState, random_selector, round_robin_selector, select_next
 
 
 def test_select_next_prefers_due_low_mastery_concept():
@@ -65,3 +65,32 @@ def test_random_selector_only_picks_due_concepts():
 def test_random_selector_returns_none_when_nothing_due():
     states = [ConceptState("x", mastery=0.1, due=False)]
     assert random_selector(states, random.Random(0)) is None
+
+
+def test_round_robin_selector_is_deterministic():
+    concept_ids = ["a", "b", "c"]
+    picks_1 = [round_robin_selector(concept_ids, step) for step in range(20)]
+    picks_2 = [round_robin_selector(concept_ids, step) for step in range(20)]
+    assert picks_1 == picks_2
+
+
+def test_round_robin_selector_cycles_in_fixed_order():
+    concept_ids = ["a", "b", "c"]
+    picks = [round_robin_selector(concept_ids, step) for step in range(7)]
+    assert picks == ["a", "b", "c", "a", "b", "c", "a"]
+
+
+def test_round_robin_selector_covers_all_concepts_evenly():
+    concept_ids = ["a", "b", "c", "d"]
+    cycles = 25
+    counts = {cid: 0 for cid in concept_ids}
+    for step in range(len(concept_ids) * cycles):
+        counts[round_robin_selector(concept_ids, step)] += 1
+    assert all(count == cycles for count in counts.values())
+
+
+def test_round_robin_selector_rejects_empty_concept_list():
+    import pytest
+
+    with pytest.raises(ValueError):
+        round_robin_selector([], step=0)

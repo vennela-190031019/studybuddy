@@ -1,10 +1,14 @@
 """
-Shared simulation core for stage 3b: runs one learner under "random",
+Shared simulation core for stage 3b/3c: runs one learner under "random",
 "v1" (frozen BKT + SM-2 + lowest-mastery, faithfully reproducing
 sim/run_sim.py's "adaptive" policy using the same engine/mastery.py,
-engine/scheduler.py and engine/selector.py components), or "v2"
-(engine/mastery_v2.py + engine/selector_v2.py) — against the frozen
-sim/learner.py synthetic learner.
+engine/scheduler.py and engine/selector.py components), "v2"
+(engine/mastery_v2.py + engine/selector_v2.py), or "round_robin" (stage
+3c: engine.selector.round_robin_selector, no due-gating, no estimate at
+all) — against the frozen sim/learner.py synthetic learner.
+
+The random/v1/v2 branches are unchanged from stage 3b. round_robin is a
+new, additive branch alongside them.
 
 Policy-agnostic AND seed-agnostic by design: every function here takes
 seed/learner_idx as plain arguments and this module never imports
@@ -30,6 +34,7 @@ from engine.mastery_v2 import DEFAULT_DECAY_RATE, decay_towards_prior
 from engine.scheduler import SM2State
 from engine.scheduler import review as sm2_review
 from engine.selector import ConceptState
+from engine.selector import round_robin_selector
 from engine.selector import select_next as select_next_v1
 from engine.selector_v2 import CoverageConceptState, DEFAULT_PENALTY_WEIGHT
 from engine.selector_v2 import select_next as select_next_v2
@@ -118,6 +123,12 @@ def simulate_learner(
             practice_count[concept_id] += 1
             ever_practiced[concept_id] = True
 
+        return _final_outcome(learner, params, budget)
+
+    if policy == "round_robin":
+        for day in range(budget):
+            concept_id = round_robin_selector(CONCEPT_IDS, day)
+            learner.practice(concept_id, today=day)
         return _final_outcome(learner, params, budget)
 
     raise ValueError(f"unknown policy: {policy!r}")
