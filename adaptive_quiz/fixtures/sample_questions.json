@@ -1,0 +1,20 @@
+[
+  {
+    "id": "mitochondria",
+    "question": "What molecule do mitochondria produce to supply the cell with energy, and what is it often called?",
+    "answer": "ATP (adenosine triphosphate) — mitochondria are often called the powerhouse of the cell.",
+    "citation": "Mitochondria are membrane-bound organelles found in most eukaryotic cells. The Mitochondria generate most of the cell's supply of adenosine triphosphate (ATP), used as a source of chemical energy."
+  },
+  {
+    "id": "photosynthesis",
+    "question": "What pigment absorbs sunlight during photosynthesis, and where is it located?",
+    "answer": "Chlorophyll, located in the chloroplast.",
+    "citation": "Photosynthesis is the process used by plants to convert light energy into chemical energy. During Photosynthesis, chlorophyll in the chloroplast absorbs sunlight."
+  },
+  {
+    "id": "dna",
+    "question": "What year was mitochondrial DNA first sequenced?",
+    "answer": "1981.",
+    "citation": "Photosynthesis occurs mainly in the leaves of plants, within structures called chloroplasts. The products of Photosynthesis include glucose and oxygen."
+  }
+]
