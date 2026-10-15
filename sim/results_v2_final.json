@@ -1,0 +1,172 @@
+[
+  {
+    "budget": 5,
+    "num_learners": 2000,
+    "random": {
+      "mean_final_skill": 0.2244128598241204,
+      "ci_low": 0.22107651231106035,
+      "ci_high": 0.22764354699995493,
+      "diff_vs_random_mean": 0.0,
+      "diff_vs_random_ci_low": 0.0,
+      "diff_vs_random_ci_high": 0.0,
+      "mean_min_per_concept_skill": 0.11907057850068808,
+      "worst_min_per_concept_skill": 0.00022414146188636102
+    },
+    "v1": {
+      "mean_final_skill": 0.209942116623567,
+      "ci_low": 0.20673590364006247,
+      "ci_high": 0.21374943506909008,
+      "diff_vs_random_mean": -0.01447074320055342,
+      "diff_vs_random_ci_low": -0.015101529818783549,
+      "diff_vs_random_ci_high": -0.013929843705590438,
+      "mean_min_per_concept_skill": 0.11907057850068808,
+      "worst_min_per_concept_skill": 0.00022414146188636102
+    },
+    "v2": {
+      "mean_final_skill": 0.23122514266369373,
+      "ci_low": 0.22755121239056753,
+      "ci_high": 0.23449023261933255,
+      "diff_vs_random_mean": 0.006812282839573325,
+      "diff_vs_random_ci_low": 0.00649484708818088,
+      "diff_vs_random_ci_high": 0.007151037223339201,
+      "mean_min_per_concept_skill": 0.11907057850068808,
+      "worst_min_per_concept_skill": 0.00022414146188636102
+    }
+  },
+  {
+    "budget": 10,
+    "num_learners": 2000,
+    "random": {
+      "mean_final_skill": 0.2690981398325064,
+      "ci_low": 0.26531036308144884,
+      "ci_high": 0.2728849679718345,
+      "diff_vs_random_mean": 0.0,
+      "diff_vs_random_ci_low": 0.0,
+      "diff_vs_random_ci_high": 0.0,
+      "mean_min_per_concept_skill": 0.12125388219147336,
+      "worst_min_per_concept_skill": 0.00023017678290357277
+    },
+    "v1": {
+      "mean_final_skill": 0.249378777877282,
+      "ci_low": 0.24584035239740182,
+      "ci_high": 0.2533584740082007,
+      "diff_vs_random_mean": -0.019719361955224432,
+      "diff_vs_random_ci_low": -0.02045265690854384,
+      "diff_vs_random_ci_high": -0.01893099521407276,
+      "mean_min_per_concept_skill": 0.09260414881160511,
+      "worst_min_per_concept_skill": 0.00015152824749184923
+    },
+    "v2": {
+      "mean_final_skill": 0.27888092435161965,
+      "ci_low": 0.2750264898171507,
+      "ci_high": 0.2826737108036971,
+      "diff_vs_random_mean": 0.009782784519113175,
+      "diff_vs_random_ci_low": 0.00928877820044171,
+      "diff_vs_random_ci_high": 0.01028824272828846,
+      "mean_min_per_concept_skill": 0.18350532255732735,
+      "worst_min_per_concept_skill": 0.028145447175978777
+    }
+  },
+  {
+    "budget": 20,
+    "num_learners": 2000,
+    "random": {
+      "mean_final_skill": 0.32002038482501466,
+      "ci_low": 0.31502516239600825,
+      "ci_high": 0.3253555342080532,
+      "diff_vs_random_mean": 0.0,
+      "diff_vs_random_ci_low": 0.0,
+      "diff_vs_random_ci_high": 0.0,
+      "mean_min_per_concept_skill": 0.16430587658706225,
+      "worst_min_per_concept_skill": 0.0008957629617387225
+    },
+    "v1": {
+      "mean_final_skill": 0.30588840988500177,
+      "ci_low": 0.3008922863301746,
+      "ci_high": 0.3111093979075532,
+      "diff_vs_random_mean": -0.014131974940012908,
+      "diff_vs_random_ci_low": -0.014839645215948232,
+      "diff_vs_random_ci_high": -0.013324441832707834,
+      "mean_min_per_concept_skill": 0.12184509459933496,
+      "worst_min_per_concept_skill": 0.00016035722641447514
+    },
+    "v2": {
+      "mean_final_skill": 0.3285420759010034,
+      "ci_low": 0.3234757006175771,
+      "ci_high": 0.3340839176251943,
+      "diff_vs_random_mean": 0.008521691075988758,
+      "diff_vs_random_ci_low": 0.007946686008168016,
+      "diff_vs_random_ci_high": 0.009127202095125806,
+      "mean_min_per_concept_skill": 0.2179192417438908,
+      "worst_min_per_concept_skill": 0.016247164268926296
+    }
+  },
+  {
+    "budget": 40,
+    "num_learners": 2000,
+    "random": {
+      "mean_final_skill": 0.35699132003256195,
+      "ci_low": 0.35037966527322745,
+      "ci_high": 0.36260560086248367,
+      "diff_vs_random_mean": 0.0,
+      "diff_vs_random_ci_low": 0.0,
+      "diff_vs_random_ci_high": 0.0,
+      "mean_min_per_concept_skill": 0.20988332898852166,
+      "worst_min_per_concept_skill": 0.0007851081521641622
+    },
+    "v1": {
+      "mean_final_skill": 0.34200133769095437,
+      "ci_low": 0.33608493492148694,
+      "ci_high": 0.348500743348347,
+      "diff_vs_random_mean": -0.014989982341607531,
+      "diff_vs_random_ci_low": -0.015870853804335387,
+      "diff_vs_random_ci_high": -0.014158433452853027,
+      "mean_min_per_concept_skill": 0.16837469260331978,
+      "worst_min_per_concept_skill": 8.205823758820338e-05
+    },
+    "v2": {
+      "mean_final_skill": 0.358997796481866,
+      "ci_low": 0.35234128345523047,
+      "ci_high": 0.3659419158571983,
+      "diff_vs_random_mean": 0.002006476449304125,
+      "diff_vs_random_ci_low": 0.001315335493934923,
+      "diff_vs_random_ci_high": 0.0026590028641831002,
+      "mean_min_per_concept_skill": 0.22851181652115396,
+      "worst_min_per_concept_skill": 0.007787255066042172
+    }
+  },
+  {
+    "budget": 80,
+    "num_learners": 2000,
+    "random": {
+      "mean_final_skill": 0.3719097145854566,
+      "ci_low": 0.36477077368836003,
+      "ci_high": 0.378943466699379,
+      "diff_vs_random_mean": 0.0,
+      "diff_vs_random_ci_low": 0.0,
+      "diff_vs_random_ci_high": 0.0,
+      "mean_min_per_concept_skill": 0.23182178935836686,
+      "worst_min_per_concept_skill": 0.0009121057913993037
+    },
+    "v1": {
+      "mean_final_skill": 0.3452141499909724,
+      "ci_low": 0.33846690091506526,
+      "ci_high": 0.3526972365279382,
+      "diff_vs_random_mean": -0.026695564594484175,
+      "diff_vs_random_ci_low": -0.02765725597033505,
+      "diff_vs_random_ci_high": -0.025745657002147086,
+      "mean_min_per_concept_skill": 0.1596287666981745,
+      "worst_min_per_concept_skill": 0.00011098566725276267
+    },
+    "v2": {
+      "mean_final_skill": 0.3711600886925781,
+      "ci_low": 0.3639478492145082,
+      "ci_high": 0.3782113432178402,
+      "diff_vs_random_mean": -0.0007496258928784914,
+      "diff_vs_random_ci_low": -0.0014670697238510473,
+      "diff_vs_random_ci_high": -2.5593864076479713e-05,
+      "mean_min_per_concept_skill": 0.2531454003798463,
+      "worst_min_per_concept_skill": 0.0030773480910373996
+    }
+  }
+]

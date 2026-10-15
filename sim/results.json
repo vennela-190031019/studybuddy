@@ -1,0 +1,172 @@
+[
+  {
+    "budget": 5,
+    "num_learners": 1000,
+    "adaptive_final_skill": {
+      "mean": 0.21132500608177568,
+      "ci_low": 0.20659795245815,
+      "ci_high": 0.2159786187367895
+    },
+    "random_final_skill": {
+      "mean": 0.22682936822589947,
+      "ci_low": 0.22218851390915872,
+      "ci_high": 0.2315017326002654
+    },
+    "final_skill_diff": {
+      "mean": -0.015504362144123774,
+      "ci_low": -0.016286118359595463,
+      "ci_high": -0.014663828750999005
+    },
+    "adaptive_questions_to_mastery": {
+      "mean": 5.0,
+      "ci_low": 5.0,
+      "ci_high": 5.0
+    },
+    "random_questions_to_mastery": {
+      "mean": 5.0,
+      "ci_low": 5.0,
+      "ci_high": 5.0
+    },
+    "questions_to_mastery_diff": {
+      "mean": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    }
+  },
+  {
+    "budget": 10,
+    "num_learners": 1000,
+    "adaptive_final_skill": {
+      "mean": 0.25325534326721666,
+      "ci_low": 0.24819693815208083,
+      "ci_high": 0.2583983890813282
+    },
+    "random_final_skill": {
+      "mean": 0.27468351014054065,
+      "ci_low": 0.2692889532127002,
+      "ci_high": 0.27985902998836465
+    },
+    "final_skill_diff": {
+      "mean": -0.021428166873323967,
+      "ci_low": -0.022473830887777442,
+      "ci_high": -0.0203818211605789
+    },
+    "adaptive_questions_to_mastery": {
+      "mean": 10.0,
+      "ci_low": 10.0,
+      "ci_high": 10.0
+    },
+    "random_questions_to_mastery": {
+      "mean": 10.0,
+      "ci_low": 10.0,
+      "ci_high": 10.0
+    },
+    "questions_to_mastery_diff": {
+      "mean": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    }
+  },
+  {
+    "budget": 20,
+    "num_learners": 1000,
+    "adaptive_final_skill": {
+      "mean": 0.31457438299468776,
+      "ci_low": 0.3072986648676747,
+      "ci_high": 0.32231336365477425
+    },
+    "random_final_skill": {
+      "mean": 0.32989705049542245,
+      "ci_low": 0.3225956026942394,
+      "ci_high": 0.33732122611302134
+    },
+    "final_skill_diff": {
+      "mean": -0.015322667500734672,
+      "ci_low": -0.016235061745294373,
+      "ci_high": -0.014347378938486565
+    },
+    "adaptive_questions_to_mastery": {
+      "mean": 20.0,
+      "ci_low": 20.0,
+      "ci_high": 20.0
+    },
+    "random_questions_to_mastery": {
+      "mean": 20.0,
+      "ci_low": 20.0,
+      "ci_high": 20.0
+    },
+    "questions_to_mastery_diff": {
+      "mean": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    }
+  },
+  {
+    "budget": 40,
+    "num_learners": 1000,
+    "adaptive_final_skill": {
+      "mean": 0.35392726150381054,
+      "ci_low": 0.3439072828913001,
+      "ci_high": 0.3643170131576502
+    },
+    "random_final_skill": {
+      "mean": 0.37195422462639566,
+      "ci_low": 0.36272468772957445,
+      "ci_high": 0.3815889510610554
+    },
+    "final_skill_diff": {
+      "mean": -0.018026963122585126,
+      "ci_low": -0.01893815046904535,
+      "ci_high": -0.017085062899387774
+    },
+    "adaptive_questions_to_mastery": {
+      "mean": 40.0,
+      "ci_low": 40.0,
+      "ci_high": 40.0
+    },
+    "random_questions_to_mastery": {
+      "mean": 40.0,
+      "ci_low": 40.0,
+      "ci_high": 40.0
+    },
+    "questions_to_mastery_diff": {
+      "mean": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0
+    }
+  },
+  {
+    "budget": 80,
+    "num_learners": 1000,
+    "adaptive_final_skill": {
+      "mean": 0.35869868344335576,
+      "ci_low": 0.3481846481767246,
+      "ci_high": 0.36916618974205845
+    },
+    "random_final_skill": {
+      "mean": 0.38620345612352464,
+      "ci_low": 0.3766048167701243,
+      "ci_high": 0.3963934534188733
+    },
+    "final_skill_diff": {
+      "mean": -0.027504772680168887,
+      "ci_low": -0.028841710874064806,
+      "ci_high": -0.026269633229992585
+    },
+    "adaptive_questions_to_mastery": {
+      "mean": 79.93,
+      "ci_low": 79.86,
+      "ci_high": 79.985
+    },
+    "random_questions_to_mastery": {
+      "mean": 79.997,
+      "ci_low": 79.991,
+      "ci_high": 80.0
+    },
+    "questions_to_mastery_diff": {
+      "mean": 0.067,
+      "ci_low": 0.013,
+      "ci_high": 0.139
+    }
+  }
+]
