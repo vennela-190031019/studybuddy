@@ -10,13 +10,27 @@ questions listed separately -> round_robin_selector decides question
 order -> engine.mastery (BKT) tracks a per-concept mastery estimate as
 the learner answers.
 
-Question generation is a deterministic, free template (one question per
-concept, citing its source passage verbatim) — never an LLM call. This
-page never spends API credits, whether or not OPENAI_API_KEY is set; the
-key's only effect here is choosing demo vs. your-own-document mode. A
-real LLM-based generator would be natural future work, following the
-same "adapter behind the same interface, explicitly untested until run"
-pattern used for engine/grounding.py's LLMGroundingVerifier.
+Two question-generation paths:
+  - No OPENAI_API_KEY: demo/template path (build_quiz) — bundled fixture
+    document + fixture questions, or a deterministic free template
+    generator over the user's own text. Never calls an LLM, never costs
+    anything.
+  - OPENAI_API_KEY present and notes supplied: build_llm_grounded_quiz
+    calls the EXISTING, real src.quiz_generator.generate_quiz() (the
+    same function app.py's main quiz uses), then runs every generated
+    question through the same free, deterministic MockGroundingVerifier
+    before anything reaches the quiz — so the LLM only ever gets to
+    *propose* questions; grounding decides what the learner actually sees.
+
+CAVEAT, stated plainly: build_llm_grounded_quiz's real-API code path
+(generate_quiz actually calling OpenAI) is NOT exercised by this
+project's automated tests or CI — tests inject a stub generator so no
+network call is ever made in CI. It has only been verified with
+generate_quiz replaced by a stub. See docs/FINDINGS.md's "Manual test
+checklist" to validate it yourself against the real API with your own
+key. This mirrors the same "adapter behind the same interface,
+explicitly untested until run" caveat already used for
+engine/grounding.py's LLMGroundingVerifier.
 """
 from __future__ import annotations
 
@@ -183,3 +197,106 @@ def grade_and_update_mastery(
 
     concepts_to_review = [cid for cid, m in mastery.items() if m < MASTERY_REVIEW_THRESHOLD]
     return mastery, concepts_to_review, correctness
+
+
+def assign_passage(question_text: str, answer_text: str, passages: list[str]) -> str | None:
+    """
+    Deterministic word-overlap match: scores each passage by how many
+    keywords it shares with (question_text + answer_text), and returns
+    the passage with the highest score. Ties go to the earliest passage
+    in the list (strict ">" below, so an equal-scoring later passage
+    never displaces an earlier one) — deterministic regardless of
+    question order, since each call only depends on its own arguments.
+    Returns None if there are no passages, or none share any keyword
+    with the question/answer at all.
+    """
+    if not passages:
+        return None
+    target_keywords = _keywords(question_text) | _keywords(answer_text)
+    if not target_keywords:
+        return None
+
+    best_passage: str | None = None
+    best_score = 0
+    for passage in passages:
+        score = len(target_keywords & _keywords(passage))
+        if score > best_score:
+            best_score = score
+            best_passage = passage
+    return best_passage
+
+
+@dataclass(frozen=True)
+class LLMQuizBuildResult:
+    ok: bool
+    error: str | None
+    generated_count: int
+    kept_questions: list[Question]
+    dropped_questions: list[tuple[Question, str]]
+
+
+def build_llm_grounded_quiz(
+    notes: str,
+    passages: list[str],
+    num_questions: int = 6,
+    generate_quiz_fn=None,
+) -> LLMQuizBuildResult:
+    """
+    Calls generate_quiz_fn (defaults to the real, existing
+    src.quiz_generator.generate_quiz — see the module docstring's
+    caveat: that real-API path is not exercised by this project's tests)
+    to get LLM-written questions, assigns each one its best-matching
+    source passage by deterministic word overlap (assign_passage), then
+    runs every question through the free, deterministic
+    MockGroundingVerifier before anything reaches the quiz.
+
+    Any exception from the generator, or any malformed output (missing
+    fields, wrong type, an empty question list), is caught here and
+    turned into a clear ok=False error result — this function never
+    raises, and it never falls back to any other question source; the
+    caller (the page) is expected to show the error and stop, not
+    silently substitute the template/demo path.
+    """
+    if generate_quiz_fn is None:
+        from src.quiz_generator import generate_quiz as generate_quiz_fn
+
+    try:
+        quiz = generate_quiz_fn(notes, num_questions=num_questions)
+        raw_questions = list(quiz.questions)
+        candidates = []
+        for raw in raw_questions:
+            question_id = str(raw.id)
+            question_text = str(raw.question).strip()
+            answer_text = str(raw.correct_answer).strip()
+            if not question_text or not answer_text:
+                raise ValueError(f"question {question_id!r} is missing question/answer text")
+            passage = assign_passage(question_text, answer_text, passages)
+            candidates.append(
+                Question(id=question_id, question=question_text, answer=answer_text, citation=passage)
+            )
+    except Exception as exc:
+        return LLMQuizBuildResult(
+            ok=False,
+            error=f"Question generation failed or returned malformed output: {exc}",
+            generated_count=0,
+            kept_questions=[],
+            dropped_questions=[],
+        )
+
+    if not candidates:
+        return LLMQuizBuildResult(
+            ok=False,
+            error="The generator returned no usable questions.",
+            generated_count=0,
+            kept_questions=[],
+            dropped_questions=[],
+        )
+
+    kept, dropped = filter_grounded(candidates, MockGroundingVerifier())
+    return LLMQuizBuildResult(
+        ok=True,
+        error=None,
+        generated_count=len(candidates),
+        kept_questions=kept,
+        dropped_questions=dropped,
+    )

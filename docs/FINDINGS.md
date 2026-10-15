@@ -158,3 +158,50 @@ Listed, not attempted, per instruction:
    until its own final report.
 
 These are listed as candidate next steps only. None of them have been run.
+
+## Stage 5: the real-LLM question path is not tested against the real API
+
+`adaptive_quiz.logic.build_llm_grounded_quiz()` (used by the Adaptive
+Quiz page when `OPENAI_API_KEY` is set and notes are supplied) calls the
+existing, real `src.quiz_generator.generate_quiz()` — the same function
+`app.py`'s main quiz uses — then runs every generated question through
+the free, deterministic `MockGroundingVerifier` before anything reaches
+the quiz. **This project's automated tests and CI never call the real
+API.** Every test in `tests/test_adaptive_quiz_logic.py` that exercises
+`build_llm_grounded_quiz` injects an explicit `generate_quiz_fn` stub —
+none of them let it fall back to the real `generate_quiz`, so no test
+makes a network call. This is stated in both the module docstring in
+`adaptive_quiz/logic.py` and here, deliberately, so it isn't mistaken for
+"verified against OpenAI" — it's only verified against a stub that
+matches the real function's interface.
+
+### Manual test checklist (run once, with your own key)
+
+1. Put a real key in `.env` (`OPENAI_API_KEY=...`), then run:
+   ```bash
+   streamlit run app.py
+   ```
+   and open the **Adaptive Quiz** page from the sidebar nav.
+2. Confirm the page shows **"Questions from the LLM, checked against
+   your notes"**, not the demo-mode banner.
+3. Paste a short, factual passage you know well enough to judge — e.g.
+   2-3 paragraphs from a textbook chapter or a Wikipedia summary on a
+   topic you understand. Avoid pasting anything sensitive; it gets sent
+   to the LLM.
+4. Click **Build quiz** and record:
+   - **N generated** — the number shown in the summary line.
+   - **N kept** — how many questions appear in the quiz below.
+   - **N dropped** — how many appear in the "Dropped questions" expander.
+5. For every dropped question, read its assigned passage and reason, and
+   judge for yourself: **was it actually unsupported by your notes**, or
+   did the grounding verifier reject something that was genuinely
+   answerable from the passage (a false rejection)? Record both counts
+   (true unsupported vs. false rejection) — `MockGroundingVerifier`'s
+   keyword-overlap heuristic has known false positives/negatives (see
+   `evals/grounding_cases.yaml` and its reported precision/recall from
+   stage 1), so some disagreement is expected; the question is whether
+   it's within that expected range or clearly broken.
+6. Separately, try to break the error path: temporarily set
+   `OPENAI_API_KEY` to an invalid value and click **Build quiz** again.
+   Confirm the page shows a clear `st.error(...)` message and does **not**
+   fall back to template questions or crash.
