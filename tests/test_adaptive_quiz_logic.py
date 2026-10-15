@@ -6,13 +6,18 @@ from adaptive_quiz.logic import (
     DEFAULT_POLICY,
     QuizBuildResult,
     assign_passage,
+    build_evidence,
     build_llm_grounded_quiz,
     build_quiz,
+    extract_supporting_sentence,
     grade_and_update_mastery,
     is_demo_mode,
     load_demo_document,
     load_demo_questions,
+    locate_passage_span,
     ordered_concept_ids,
+    plain_language_reason,
+    render_notes_html,
 )
 from engine.grounding import Question
 from src.schemas import Quiz, QuizQuestion
@@ -267,3 +272,105 @@ def test_demo_path_still_works_with_no_api_key(no_api_key):
     result = build_quiz(document_text=None)
     assert result.demo_mode is True
     assert result.document_text == load_demo_document()
+
+
+# ---------------------------------------------------------------------------
+# Stage 6, Part A: evidence view (span location, sentence extraction, HTML
+# escaping).
+# ---------------------------------------------------------------------------
+
+
+def test_locate_passage_span_exact_match():
+    notes = "Intro paragraph.\n\nMitochondria produce ATP for the cell.\n\nOutro paragraph."
+    passage = "Mitochondria produce ATP for the cell."
+    span = locate_passage_span(notes, passage)
+    assert span is not None
+    start, end = span
+    assert notes[start:end] == passage
+
+
+def test_locate_passage_span_handles_whitespace_differences():
+    notes = "Intro.\n\nMitochondria   produce\nATP for   the cell.\n\nOutro."
+    passage = "Mitochondria produce ATP for the cell."
+    span = locate_passage_span(notes, passage)
+    assert span is not None
+    start, end = span
+    # the original (whitespace-irregular) substring is returned, not the
+    # normalized passage string
+    assert notes[start:end] == "Mitochondria   produce\nATP for   the cell."
+
+
+def test_locate_passage_span_returns_none_when_not_found():
+    notes = "This text is about photosynthesis and chlorophyll."
+    passage = "This sentence does not appear anywhere in the notes at all."
+    assert locate_passage_span(notes, passage) is None
+
+
+def test_locate_passage_span_handles_empty_inputs():
+    assert locate_passage_span("", "something") is None
+    assert locate_passage_span("something", "") is None
+
+
+def test_extract_supporting_sentence_picks_best_matching_sentence():
+    passage = (
+        "Mitochondria are membrane-bound organelles. "
+        "Mitochondria generate ATP for the cell. "
+        "Chloroplasts are found only in plants."
+    )
+    sentence = extract_supporting_sentence(
+        "What do mitochondria generate?", "ATP", passage
+    )
+    assert sentence == "Mitochondria generate ATP for the cell."
+
+
+def test_build_evidence_locates_sentence_in_original_notes():
+    notes = "Para one.\n\nMitochondria generate ATP for the cell. They are tiny.\n\nPara three."
+    questions = [
+        Question(
+            id="mito",
+            question="What do mitochondria generate?",
+            answer="ATP",
+            citation="Mitochondria generate ATP for the cell. They are tiny.",
+        )
+    ]
+    evidence = build_evidence(notes, questions)
+    assert evidence["mito"].sentence == "Mitochondria generate ATP for the cell."
+    assert evidence["mito"].span is not None
+    start, end = evidence["mito"].span
+    assert notes[start:end] == "Mitochondria generate ATP for the cell."
+
+
+def test_render_notes_html_escapes_untrusted_notes_with_no_highlight():
+    notes = "Click <script>alert('x')</script> here."
+    output = render_notes_html(notes, None)
+    assert "<script>" not in output
+    assert "&lt;script&gt;" in output
+
+
+def test_render_notes_html_escapes_untrusted_notes_with_highlight():
+    notes = "before <img src=x onerror=alert(1)> after"
+    # highlight exactly the malicious-looking span
+    start = notes.index("<img")
+    end = start + len("<img src=x onerror=alert(1)>")
+    output = render_notes_html(notes, (start, end))
+
+    assert "<img" not in output
+    assert "onerror=alert(1)>" not in output
+    assert "&lt;img" in output
+    # our own wrapper tag is legitimately present as literal HTML
+    assert '<mark class="aq-highlight">' in output
+    assert "</mark>" in output
+
+
+def test_render_notes_html_highlighted_text_is_escaped_not_raw():
+    notes = "The passage says: 5 < 10 and 10 > 5, which is true."
+    start = notes.index("5 < 10")
+    end = start + len("5 < 10")
+    output = render_notes_html(notes, (start, end))
+    assert "5 &lt; 10" in output
+    assert "5 < 10" not in output
+
+
+def test_plain_language_reason_translates_known_reasons():
+    assert "No matching passage" in plain_language_reason("no citation provided")
+    assert "didn't share enough wording" in plain_language_reason("keyword overlap 0.00 < 0.4")

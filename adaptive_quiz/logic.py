@@ -22,6 +22,13 @@ Two question-generation paths:
     before anything reaches the quiz — so the LLM only ever gets to
     *propose* questions; grounding decides what the learner actually sees.
 
+Evidence view: for each kept question, build_evidence() locates the
+specific sentence (within its assigned passage) that best supports it,
+and its character span inside the original notes — so the page can
+highlight exactly what's being cited rather than a whole paragraph.
+Notes are untrusted user text; render_notes_html() escapes all of it
+before embedding it in HTML, so highlighting can never inject markup.
+
 CAVEAT, stated plainly: build_llm_grounded_quiz's real-API code path
 (generate_quiz actually calling OpenAI) is NOT exercised by this
 project's automated tests or CI — tests inject a stub generator so no
@@ -34,6 +41,7 @@ engine/grounding.py's LLMGroundingVerifier.
 """
 from __future__ import annotations
 
+import html
 import json
 import os
 import re
@@ -300,3 +308,149 @@ def build_llm_grounded_quiz(
         kept_questions=kept,
         dropped_questions=dropped,
     )
+
+
+# ---------------------------------------------------------------------------
+# Evidence view: locating a cited passage/sentence inside the original
+# notes text, so the UI can highlight exactly what supports each question.
+# ---------------------------------------------------------------------------
+
+_SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
+
+
+def _normalize_with_positions(text: str) -> tuple[str, list[int]]:
+    """
+    Collapses whitespace runs to a single space and strips the ends,
+    like `" ".join(text.split())`, but also returns a parallel list where
+    positions[k] is the index in the ORIGINAL text that normalized
+    character k came from — so a match found in the normalized string can
+    be mapped back to a span in the original string.
+    """
+    normalized_chars: list[str] = []
+    positions: list[int] = []
+    prev_was_space = True  # treat the start as "after a space" so leading whitespace is dropped, not collapsed into a leading " "
+
+    for i, ch in enumerate(text):
+        if ch.isspace():
+            if not prev_was_space:
+                normalized_chars.append(" ")
+                positions.append(i)
+                prev_was_space = True
+        else:
+            normalized_chars.append(ch)
+            positions.append(i)
+            prev_was_space = False
+
+    while normalized_chars and normalized_chars[-1] == " ":
+        normalized_chars.pop()
+        positions.pop()
+
+    return "".join(normalized_chars), positions
+
+
+def locate_passage_span(notes: str, passage: str) -> tuple[int, int] | None:
+    """
+    Finds `passage` inside `notes` and returns its (start, end) character
+    span in `notes`. Tries an exact substring match first; if that fails,
+    falls back to a whitespace-normalized match (so differences in
+    spacing/newlines between the stored passage and the live notes text
+    don't block highlighting) mapped back to the original indices. Never
+    guesses: returns None if neither match succeeds.
+    """
+    if not notes or not passage:
+        return None
+
+    exact_index = notes.find(passage)
+    if exact_index != -1:
+        return (exact_index, exact_index + len(passage))
+
+    normalized_notes, notes_positions = _normalize_with_positions(notes)
+    normalized_passage, _ = _normalize_with_positions(passage)
+    if not normalized_passage:
+        return None
+
+    match_index = normalized_notes.find(normalized_passage)
+    if match_index == -1:
+        return None
+
+    start = notes_positions[match_index]
+    end = notes_positions[match_index + len(normalized_passage) - 1] + 1
+    return (start, end)
+
+
+def extract_supporting_sentence(question_text: str, answer_text: str, passage: str) -> str:
+    """
+    Splits `passage` into sentences and returns the single sentence with
+    the highest keyword overlap against (question_text + answer_text) —
+    the most specific unit of evidence to highlight/quote, rather than
+    the whole (possibly multi-sentence) passage. Ties go to the earliest
+    sentence. Falls back to the whole passage if it has no sentence
+    boundaries or no sentence shares any keyword.
+    """
+    if not passage or not passage.strip():
+        return passage
+
+    sentences = [s.strip() for s in _SENTENCE_SPLIT_RE.split(passage.strip()) if s.strip()]
+    if len(sentences) <= 1:
+        return passage.strip()
+
+    target_keywords = _keywords(question_text) | _keywords(answer_text)
+    if not target_keywords:
+        return sentences[0]
+
+    best_sentence = sentences[0]
+    best_score = -1
+    for sentence in sentences:
+        score = len(target_keywords & _keywords(sentence))
+        if score > best_score:
+            best_score = score
+            best_sentence = sentence
+    return best_sentence
+
+
+@dataclass(frozen=True)
+class Evidence:
+    question_id: str
+    sentence: str
+    span: tuple[int, int] | None
+
+
+def build_evidence(notes: str, questions: list[Question]) -> dict[str, Evidence]:
+    """One Evidence entry per question: its best-supporting sentence
+    (from its assigned passage) and that sentence's span in `notes`, or
+    span=None if it couldn't be located (never guessed)."""
+    evidence: dict[str, Evidence] = {}
+    for question in questions:
+        sentence = extract_supporting_sentence(question.question, question.answer, question.citation or "")
+        span = locate_passage_span(notes, sentence) if sentence else None
+        evidence[question.id] = Evidence(question_id=question.id, sentence=sentence, span=span)
+    return evidence
+
+
+def render_notes_html(notes: str, highlight_span: tuple[int, int] | None) -> str:
+    """
+    Renders `notes` as HTML with the character range `highlight_span`
+    wrapped in a <mark>. The notes are untrusted user text: every piece
+    of it is passed through html.escape() before being placed in the
+    output, including the highlighted portion — only the <mark> wrapper
+    itself is literal HTML that this function controls, so no markup
+    from the notes can ever reach the page unescaped.
+    """
+    if not highlight_span:
+        return f'<div class="aq-notes">{html.escape(notes)}</div>'
+
+    start, end = highlight_span
+    before = html.escape(notes[:start])
+    highlighted = html.escape(notes[start:end])
+    after = html.escape(notes[end:])
+    return f'<div class="aq-notes">{before}<mark class="aq-highlight">{highlighted}</mark>{after}</div>'
+
+
+def plain_language_reason(reason: str) -> str:
+    """Translates engine.grounding's technical verifier reason strings
+    into a short, plain-language explanation for display."""
+    if "no citation" in reason:
+        return "No matching passage was found in your notes."
+    if "overlap" in reason:
+        return "The question and the passage didn't share enough wording to confirm support."
+    return reason
